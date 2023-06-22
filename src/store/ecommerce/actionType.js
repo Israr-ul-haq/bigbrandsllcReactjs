@@ -1,0 +1,14 @@
+// Actions
+export const API_RESPONSE_SUCCESS = "API_RESPONSE_SUCCESS";
+export const API_RESPONSE_ERROR = "API_RESPONSE_ERROR";
+export const GET_PRODUCTS = "GET_PRODUCTS";
+export const GET_BRAND = "GET_BRAND";
+export const GET_BRANDs = "GET_BRANDs";
+export const ADD_BRAND = "ADD_BRAND";
+export const GET_VENDOR = "GET_VENDOR";
+export const ADD_VENDOR = "ADD_VENDOR";
+export const GET_SELECTED_ITEM = "GET_SELECTED_ITEM";
+export const ADD_PRODUCT = "ADD_PRODUCT";
+export const GET_TABLE_COLUMNS = "GET_TABLE_COLUMNS";
+export const UPDATE_TABLE_COLUMNS = "UPDATE_TABLE_COLUMNS";
+export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
