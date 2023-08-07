@@ -1,11 +1,13 @@
 import axios from "axios";
 import { baseUrl } from "../../../helpers/baseUrl";
 
-export const getProducts = async () => {
+export const getProducts = async (data) => {
   try {
-    const response = await axios.get(`${baseUrl}/akeneo/products`);
-    console.log(response);
-    return response;
+    if (data !== undefined) {
+      const response = await axios.get(`${baseUrl}/akeneo/products/${data}`);
+      console.log(response);
+      return response;
+    }
   } catch (error) {
     return error.response;
   }
@@ -18,14 +20,20 @@ export const getAllProducts = async (
   brandId,
   pricingCategory,
   checked,
-  hasPrice
+  hasPrice,
+  data
 ) => {
   try {
-    const response = await axios.get(
-      `${baseUrl}/product/productsAllProducts?page=${page}&search=${search}&limit=${limit}&brandId=${brandId}&pricing_category=${pricingCategory}&includeZeroPrice=${checked}&hasPrice=${hasPrice}`
-    );
-    console.log(response);
-    return response;
+    const parsedData = JSON.parse(data);
+    const sourceId = parsedData?.client_secret;
+
+    if (sourceId !== undefined) {
+      const response = await axios.get(
+        `${baseUrl}/product/productsAllProducts?page=${page}&search=${search}&limit=${limit}&brandId=${brandId}&pricing_category=${pricingCategory}&includeZeroPrice=${checked}&hasPrice=${hasPrice}&sourceId=${sourceId}`
+      );
+      console.log(response);
+      return response;
+    }
   } catch (error) {
     return error.response;
   }

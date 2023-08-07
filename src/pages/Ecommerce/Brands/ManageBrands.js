@@ -8,6 +8,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getBrandData } from "../../../store/actions";
 import { isEmpty } from "lodash";
 import BrandsTableContainer from "../../../Components/Common/BrandsTableContainer";
+import { getBrands } from "../EcommerceProducts/FiltersService";
+import { getIntegrationData } from "../Integration/IntegerationService";
 
 function ManageBrands() {
   const dispatch = useDispatch();
@@ -18,32 +20,7 @@ function ManageBrands() {
   const [tablePageSize, setTablePageSize] = useState(10);
   const [tableCurPage, setTableCurPage] = useState(1);
   const [loader, setLoader] = useState(false);
-  const { products, tableColumns, curPage, brand, brandsData } = useSelector(
-    (state) => {
-      return {
-        products: state.Ecommerce.products,
-        tableColumns: state.Ecommerce.tableColumns,
-        curPage: state.Ecommerce.curPage,
-        brand: state.Ecommerce.brand,
-        brandsData: state.Ecommerce.brandsData,
-      };
-    }
-  );
 
-  console.log(brandsData, "brandsData");
-
-  useEffect(() => {
-    if (brandsData && !brandsData.length) {
-      dispatch(
-        getBrandData({
-          page: 1,
-          limit: tablePageSize,
-          search: searchKey,
-          enabled: productState,
-        })
-      );
-    }
-  }, [dispatch, brandsData, tableCurPage, tablePageSize, searchKey]);
   const columns = useMemo(() => {
     let arr = [];
     arr.push({
@@ -60,14 +37,28 @@ function ManageBrands() {
       filterable: false,
     });
     return arr;
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    setBrandList(brandsData);
-  }, [brandsData]);
-  useEffect(() => {
-    if (!isEmpty(products)) setBrandList(brandsData);
-  }, [brandsData]);
+    const fetchData = async () => {
+      const responseInt = await getIntegrationData();
+      const selectedObject = responseInt.find((i) => i.status === true);
+
+      const data = JSON.stringify({
+        grant_type: "password",
+        client_id: selectedObject?.clientId,
+        client_secret: selectedObject?.secret,
+        username: selectedObject?.userName,
+        password: selectedObject?.password,
+        domain: selectedObject?.domain,
+      });
+
+      const response = await getBrands(data);
+      setBrandList(response.data);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -91,7 +82,7 @@ function ManageBrands() {
                       {BrandList && BrandList?.length > 0 ? (
                         <BrandsTableContainer
                           columns={columns}
-                          data={brandsData || []}
+                          data={BrandList || []}
                           isGlobalFilter={false}
                           isAddUserList={false}
                           isAddOptions={false}

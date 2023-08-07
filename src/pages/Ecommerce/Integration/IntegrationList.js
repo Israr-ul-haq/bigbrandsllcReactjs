@@ -20,6 +20,8 @@ const IntegrationList = () => {
 
     if (response) {
       setData(response);
+
+      console.log(response, "response");
     } else {
       setLoader(false);
     }

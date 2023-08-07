@@ -36,6 +36,10 @@ import {
 import Switch from "react-switch";
 import Columns from "./Table_Columns";
 import { ImportStatusContext } from "../../../Components/constants/ImportStatusContext";
+import {
+  getIntegrationData,
+  updateStatus,
+} from "../Integration/IntegerationService";
 
 const EcommerceProducts = () => {
   const [productList, setProductList] = useState([]);
@@ -50,8 +54,13 @@ const EcommerceProducts = () => {
   const [toggleManager, settoggleManager] = useState(false);
   const [importModal, setImportModal] = useState(false);
   const [akeneoSlectedProducts, setAkeneoSelectedProducts] = useState([]);
-  const { importStatus, updateImportStatus, sharedState } =
-    useContext(ImportStatusContext);
+
+  const {
+    importStatus,
+    updateImportStatus,
+    sharedState,
+    updateIntegerationData,
+  } = useContext(ImportStatusContext);
 
   const {
     selectedBrand,
@@ -78,18 +87,35 @@ const EcommerceProducts = () => {
     setCurrentPage,
     isViewOpen,
     setIsViewOpen,
+    selectedIntegeration,
+    setSelectedIntegeration,
+    integerationData,
+    setIntegerationData,
   } = sharedState;
+
+  console.log(integerationData);
 
   const handleToggleChange = async (checked) => {
     setToggleValue(checked);
     setPriceToggleValue(false);
+
+    const data = JSON.stringify({
+      grant_type: "password",
+      client_id: selectedIntegeration?.clientId,
+      client_secret: selectedIntegeration?.secret,
+      username: selectedIntegeration?.userName,
+      password: selectedIntegeration?.password,
+    });
+
     const response = await getAllProducts(
       currentPage,
       pageSize,
       search,
       selectedBrand,
       selectedPricing,
-      checked
+      checked,
+      false,
+      data
     );
     if (response) {
       setProductList(response?.results);
@@ -101,6 +127,14 @@ const EcommerceProducts = () => {
   const handleTogglePriceChange = async (checked) => {
     setPriceToggleValue(checked);
     setToggleValue(false);
+
+    const data = JSON.stringify({
+      grant_type: "password",
+      client_id: selectedIntegeration?.clientId,
+      client_secret: selectedIntegeration?.secret,
+      username: selectedIntegeration?.userName,
+      password: selectedIntegeration?.password,
+    });
     const response = await getAllProducts(
       currentPage,
       pageSize,
@@ -108,7 +142,8 @@ const EcommerceProducts = () => {
       selectedBrand,
       selectedPricing,
       false,
-      checked
+      checked,
+      data
     );
     if (response) {
       setProductList(response?.results);
@@ -121,6 +156,33 @@ const EcommerceProducts = () => {
   const getData = async () => {
     setLoader(true);
 
+    const responseInt = await getIntegrationData();
+
+    const selectedObject = responseInt.find((i) => i.status === true);
+    if (selectedObject) {
+      setSelectedIntegeration(selectedObject);
+    }
+
+    if (responseInt) {
+      setIntegerationData(responseInt);
+    }
+
+    const data = JSON.stringify({
+      grant_type: "password",
+      client_id: selectedObject?.clientId,
+      client_secret: selectedObject?.secret,
+      username: selectedObject?.userName,
+      password: selectedObject?.password,
+      domain: selectedObject?.domain,
+    });
+
+    const brandsResponse = await getBrands(data);
+    if (brandsResponse.success) {
+      setBrandsData(brandsResponse.data);
+    } else {
+      setLoader(false);
+    }
+
     const response = await getAllProducts(
       currentPage,
       pageSize,
@@ -128,21 +190,20 @@ const EcommerceProducts = () => {
       selectedBrand,
       selectedPricing,
       toggleValue,
-      priceToggleValue
+      priceToggleValue,
+      data
     );
-    const brandsResponse = await getBrands();
-    if (brandsResponse.success) {
-      setBrandsData(brandsResponse.data);
-    } else {
-      setLoader(false);
-    }
 
     if (response) {
       setProductList(response?.results);
       setTotalCount(parseInt(response?.totalResults));
     } else {
+      toast.success("No product found", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       setLoader(false);
     }
+
     setLoader(false);
   };
 
@@ -154,7 +215,10 @@ const EcommerceProducts = () => {
     const brandId = e.target.value;
     setSelectedBrand(e.target.value);
     setSelectedPricing("");
-    const response = await getPricingDataByBrand(brandId);
+    const response = await getPricingDataByBrand(
+      brandId,
+      selectedIntegeration?.secret
+    );
     if (response) {
       setPricingCategory(response);
     } else {
@@ -204,7 +268,16 @@ const EcommerceProducts = () => {
       products: akeneoSlectedProducts,
     };
     if (akeneoSlectedProducts?.length !== 0) {
-      const response = await updateFieldAkeneo(finalData);
+      const data = JSON.stringify({
+        grant_type: "password",
+        client_id: selectedIntegeration?.clientId,
+        client_secret: selectedIntegeration?.secret,
+        username: selectedIntegeration?.userName,
+        password: selectedIntegeration?.password,
+        domain: selectedIntegeration?.domain,
+      });
+
+      const response = await updateFieldAkeneo(finalData, data);
       if (response) {
         settoggleManager(false);
         resetProducts();
@@ -229,8 +302,18 @@ const EcommerceProducts = () => {
     updateImportStatus(true);
     handleImportContactDialogClose();
     try {
-      const response = await getProducts();
+      const data = JSON.stringify({
+        grant_type: "password",
+        client_id: selectedIntegeration?.clientId,
+        client_secret: selectedIntegeration?.secret,
+        username: selectedIntegeration?.userName,
+        password: selectedIntegeration?.password,
+        domain: selectedIntegeration?.domain,
+      });
+
+      const response = await getProducts(data);
       if (response) {
+        getData();
         toast.success(response.message, {
           position: toast.POSITION.TOP_RIGHT,
         });
@@ -270,13 +353,24 @@ const EcommerceProducts = () => {
     document.getElementById("brand").selectedIndex = 0;
     document.getElementById("price").selectedIndex = 0;
     setPricingCategory([]);
+
+    const data = JSON.stringify({
+      grant_type: "password",
+      client_id: selectedIntegeration?.clientId,
+      client_secret: selectedIntegeration?.secret,
+      username: selectedIntegeration?.userName,
+      password: selectedIntegeration?.password,
+      domain: selectedIntegeration?.domain,
+    });
     const response = await getAllProducts(
       currentPage,
       pageSize,
       search,
       "",
       "",
-      toggleValue
+      toggleValue,
+      "",
+      data
     );
 
     if (response) {
@@ -341,6 +435,22 @@ const EcommerceProducts = () => {
     }
   };
 
+  const selectSource = async (event) => {
+    const selectedValue = event.target.value;
+
+    // Find the selected object from the integerationData array
+    const selectedObject = integerationData.find(
+      (i) => i.clientId === selectedValue
+    );
+
+    const response = await updateStatus({
+      clientId: selectedValue,
+      status: true,
+    });
+    setSelectedIntegeration(selectedObject);
+    getData();
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -371,6 +481,28 @@ const EcommerceProducts = () => {
                                 }}
                               />
                               <i className="bx bx-search-alt search-icon"></i>
+                            </div>
+                            <div>
+                              <select
+                                name="brand"
+                                id="brand"
+                                className="form-control"
+                                style={{ width: "unset" }}
+                                onChange={selectSource}
+                                value={
+                                  selectedIntegeration
+                                    ? selectedIntegeration.clientId
+                                    : ""
+                                }
+                              >
+                                {integerationData?.map((i) => {
+                                  return (
+                                    <option value={i.clientId} key={i.id}>
+                                      {i.userName}
+                                    </option>
+                                  );
+                                })}
+                              </select>
                             </div>
                           </div>
                           <div className="d-flex gap-3">
@@ -437,7 +569,7 @@ const EcommerceProducts = () => {
                                     })}
                                   </select>
                                 </div>
-                                {pricingCategory.length !== 0 && (
+                                {pricingCategory?.length !== 0 && (
                                   <div>
                                     <select
                                       name="price"
@@ -604,10 +736,10 @@ const EcommerceProducts = () => {
                           <span className="visually-hidden">Loading...</span>
                         </Spinner>
                       </div>
-                    ) : productList.length > 0 ? (
+                    ) : productList?.length > 0 ? (
                       <TableContainer
                         columns={filteredColumns}
-                        data={productList.map((product) => {
+                        data={productList?.map((product) => {
                           return {
                             ...product, // Spread the existing properties of the product
                             Price: Number.parseFloat(product.Price).toFixed(2), // Replace the price with the updated value

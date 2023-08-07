@@ -28,6 +28,7 @@ import AnnualRowData from "./AnnualRowData";
 import QuarterlyRowData from "./QuarterlyRowData";
 import AdditionalFee from "./AdditionalFee";
 import BrandsSetting from "./BrandsSetting";
+import { getIntegrationData } from "../Integration/IntegerationService";
 
 function ViewBrands() {
   const { id } = useParams();
@@ -36,6 +37,7 @@ function ViewBrands() {
   const [activeTab, setActiveTab] = useState("1");
   const [mapActiveTab, setMapActiveTab] = useState("1");
   const [rulesActiveTab, setRulesActiveTab] = useState("1");
+  const [selectedSource, setSelectedSource] = useState("");
   const [aditionalFee, setAdditionalFee] = useState([
     {
       feeName: "",
@@ -87,6 +89,8 @@ function ViewBrands() {
     vendorRulePrice_Percentage: "",
     TotalAdditionalFee: "",
     minimumMargin: "",
+    maxMargin: "",
+    isRoundDown: false,
   });
 
   useEffect(() => {
@@ -94,8 +98,10 @@ function ViewBrands() {
   }, []);
 
   const getData = async () => {
-    const response = await getBrandsData(id);
-
+    const responseInt = await getIntegrationData();
+    const selectedObject = responseInt.find((i) => i.status === true);
+    setSelectedSource(selectedObject.secret);
+    const response = await getBrandsData(id, selectedObject.secret);
     if (response) {
       setPricingList(response);
     }
@@ -180,6 +186,8 @@ function ViewBrands() {
       vendorRulePrice_Percentage: row?.original?.vendorRulePrice_Percentage,
       minimumMargin: row?.original?.minimumMargin,
       TotalAdditionalFee: row?.original?.TotalAdditionalFee,
+      maxMargin: row?.original?.maxMargin,
+      isRoundDown: row?.original?.isRoundDown,
     };
 
     setAdditionalFee(row?.original?.AdditionalFee);
@@ -364,6 +372,7 @@ function ViewBrands() {
           AdditionalFee: aditionalFee,
           TotalAdditionalFeePrice: totalPrice,
           TotalAdditionalFeePercentage: totalPercentage,
+          sourceId: selectedSource,
         };
 
         const response = await updateCategory(updatedBrandData);
@@ -501,7 +510,11 @@ function ViewBrands() {
             </Row>
           </Container>
         </div>
-        <BrandsSetting id={id} PricingList={PricingList} />
+        <BrandsSetting
+          id={id}
+          PricingList={PricingList}
+          selectedSource={selectedSource}
+        />
         <Modal
           isOpen={toggleManagerVender}
           role="dialog"
@@ -811,7 +824,13 @@ function ViewBrands() {
                       type="number"
                       className="form-control"
                       placeholder="Enter %"
-                      value={""}
+                      value={brandData?.maxMargin}
+                      onChange={(e) => {
+                        setBrandData({
+                          ...brandData,
+                          maxMargin: e.target.value,
+                        });
+                      }}
                     />
                   </div>
                 </Col>
@@ -839,6 +858,48 @@ function ViewBrands() {
                         <option value={"true"}>Yes</option>
                         <option value={"false"}>No</option>
                       </select>
+                    </div>
+                  </div>
+                </Col>
+                <Col md={12}>
+                  <div className="mb-3">
+                    <div className="d-flex ">
+                      <Label htmlFor="readonlyInput" className="form-label">
+                        Competition price match
+                      </Label>
+                    </div>
+                    <div className="form-icon d-flex gap-3">
+                      <Label htmlFor="roundDown" className="form-label">
+                        Round down
+                      </Label>
+                      <Input
+                        type="radio"
+                        id="roundDown"
+                        checked={brandData?.isRoundDown}
+                        name="priceMatch"
+                        onChange={(e) => {
+                          setBrandData({
+                            ...brandData,
+                            isRoundDown: true,
+                          });
+                        }}
+                      />
+
+                      <Label htmlFor="exactMatch" className="form-label">
+                        Exact match
+                      </Label>
+                      <Input
+                        type="radio"
+                        id="exactMatch"
+                        checked={!brandData?.isRoundDown}
+                        name="priceMatch"
+                        onChange={(e) => {
+                          setBrandData({
+                            ...brandData,
+                            isRoundDown: false,
+                          });
+                        }}
+                      />
                     </div>
                   </div>
                 </Col>

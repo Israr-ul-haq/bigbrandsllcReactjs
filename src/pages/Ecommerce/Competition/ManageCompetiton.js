@@ -59,6 +59,8 @@ function ManageCompetition() {
 
       if (response) {
         setData(response);
+
+        console.log(response);
         setLoader(false);
       } else {
         setLoader(false);

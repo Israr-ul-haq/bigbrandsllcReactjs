@@ -51,7 +51,11 @@ const EcommerceAddProduct = () => {
           (data) => data.websiteId === compData.websiteId
         );
         if (matchingData) {
-          return { ...compData, name: matchingData.name };
+          return {
+            ...compData,
+            name: matchingData.name,
+            website: matchingData.website,
+          };
         }
         return compData;
       });
@@ -98,7 +102,16 @@ const EcommerceAddProduct = () => {
   const combinedString = [feePricesString, feeCalString]
     .filter(Boolean)
     .join(", ");
+
+  const prices = combinedString
+    .split(",")
+    .map((price) => parseFloat(price.trim()));
+
+  // Calculate the total of all prices
+  const total = prices.reduce((sum, price) => sum + price, 0);
+
   console.log(combinedString);
+  console.log("Total:", total);
 
   // const feeCal = data?.AdditionalFee?.map((item) => {
   //   const calculatedPriceFromNetCost = Number.parseFloat(item.calculatedPriceFromNetCost);
@@ -260,7 +273,9 @@ const EcommerceAddProduct = () => {
                             <Input
                               type="text"
                               className="form-control"
-                              value={data?.Shipping_Width}
+                              value={parseFloat(data?.Shipping_Width || 0)
+                                .toFixed(2)
+                                .replace(/\.?0+$/, "")}
                               readOnly
                             />
                           </div>
@@ -277,7 +292,9 @@ const EcommerceAddProduct = () => {
                               type="text"
                               className="form-control"
                               id="Shipping-Depth"
-                              value={data?.Shipping_Depth}
+                              value={parseFloat(data?.Shipping_Depth || 0)
+                                .toFixed(2)
+                                .replace(/\.?0+$/, "")}
                               placeholder="Shipping Depth"
                               readOnly
                             />
@@ -296,7 +313,9 @@ const EcommerceAddProduct = () => {
                               type="text"
                               className="form-control"
                               id="Shipping-Height"
-                              value={""}
+                              value={parseFloat(data?.Shipping_Height || 0)
+                                .toFixed(2)
+                                .replace(/\.?0+$/, "")}
                               readOnly
                             />
                           </div>
@@ -329,9 +348,14 @@ const EcommerceAddProduct = () => {
                               >
                                 Shipping Cost
                               </Label>
-                              {data?.isShipping_Cost === "true" && (
+                              {data?.isShipping_Cost === "true" ? (
                                 <div className="form-label">
                                   (Free shipping for customer)
+                                </div>
+                              ) : (
+                                <div className="form-label">
+                                  Free shipping - No (customer pays for
+                                  shipping)
                                 </div>
                               )}
                             </div>
@@ -340,7 +364,7 @@ const EcommerceAddProduct = () => {
                                 type="text"
                                 className="form-control"
                                 id="Pricing-Category"
-                                placeholder="Pricing Category"
+                                placeholder="Shipping Cost"
                                 value={
                                   data?.isShipping_Cost === "true"
                                     ? "$" + data.Shipping_Cost
@@ -349,6 +373,13 @@ const EcommerceAddProduct = () => {
                                 readOnly
                               />
                             </div>
+                            {data?.isShipping_Cost === "true" &&
+                              (data.Shipping_Cost === "" ||
+                                data.Shipping_Cost === "0") && (
+                                <p style={{ color: "red" }}>
+                                  Shipping cost is missing
+                                </p>
+                              )}
                           </div>
                         </Col>
 
@@ -495,6 +526,12 @@ const EcommerceAddProduct = () => {
                               }
                               readOnly
                             />
+
+                            {data?.List_Price === "" && (
+                              <p style={{ color: "red" }}>
+                                List price is missing
+                              </p>
+                            )}
                           </div>
                         </Col>
 
@@ -526,6 +563,14 @@ const EcommerceAddProduct = () => {
                               }
                               readOnly
                             />
+
+                            {data?.isAkeneo_NetCost_Discount === "true" &&
+                              (data.Net_Cost === "" ||
+                                data.Net_Cost === "0") && (
+                                <p style={{ color: "red" }}>
+                                  Net price is missing
+                                </p>
+                              )}
                           </div>
                         </Col>
 
@@ -563,6 +608,26 @@ const EcommerceAddProduct = () => {
                               }
                               readOnly
                             />
+
+                            {data?.MAP_Policy === "false" ? (
+                              ""
+                            ) : data?.isAkeneo_MapDiscount === "true" ? (
+                              data?.MAP_Price === "" ||
+                              data?.MAP_Price === "0" ? (
+                                <span style={{ color: "red" }}>
+                                  Map price is missing{" "}
+                                </span>
+                              ) : (
+                                ""
+                              )
+                            ) : data?.Dealer_MapPrice === "" ||
+                              data?.Dealer_MapPrice === "0" ? (
+                              <span style={{ color: "red" }}>
+                                Map price is missing{" "}
+                              </span>
+                            ) : (
+                              ""
+                            )}
                           </div>
                         </Col>
 
@@ -671,6 +736,8 @@ const EcommerceAddProduct = () => {
           setProductsData={setData}
           competeData={competeData}
           setCompeteData={setCompeteData}
+          totalAdd={total}
+          getData={getData}
         />
       </Container>
     </div>

@@ -47,22 +47,22 @@ import {
   getBrandsAkeneo,
 } from "../../helpers/fakebackend_helper";
 
-function* getProducts({ payload: productparams }) {
-  try {
-    const response = yield call(getProductsApi, productparams);
-    yield put(
-      ecommerceApiResponseSuccess(GET_PRODUCTS, {
-        products: response,
-        items_count: response.items_count,
-        curPage: productparams.page,
-        pageSize: productparams.limit,
-      })
-    );
-  } catch (error) {
-    console.log(error, "errorerror");
-    yield put(ecommerceApiResponseError(GET_PRODUCTS, error));
-  }
-}
+// function* getProducts({ payload: productparams }) {
+//   try {
+//     const response = yield call(getProductsApi, productparams);
+//     yield put(
+//       ecommerceApiResponseSuccess(GET_PRODUCTS, {
+//         products: response,
+//         items_count: response.items_count,
+//         curPage: productparams.page,
+//         pageSize: productparams.limit,
+//       })
+//     );
+//   } catch (error) {
+//     console.log(error, "errorerror");
+//     yield put(ecommerceApiResponseError(GET_PRODUCTS, error));
+//   }
+// }
 function* getItem({ payload: data }) {
   try {
     yield put(getSelectedItemSuccess(GET_SELECTED_ITEM, data));
@@ -106,14 +106,14 @@ function* updateTableColumns({ payload: tableColumns }) {
     yield put(updateTableColumnsError(UPDATE_TABLE_COLUMNS, error));
   }
 }
-function* getBrands() {
-  try {
-    const response = yield call(getBrandApi);
-    yield put(getBrandSuccess(GET_BRAND, response.data));
-  } catch (error) {
-    console.log("brand error");
-  }
-}
+// function* getBrands() {
+//   try {
+//     const response = yield call(getBrandApi);
+//     yield put(getBrandSuccess(GET_BRAND, response.data));
+//   } catch (error) {
+//     console.log("brand error");
+//   }
+// }
 function* addBrand({ payload: data }) {
   try {
     const response = yield call(addBrandApi, data);
@@ -139,18 +139,18 @@ function* addVendor({ payload: data }) {
     console.log("error");
   }
 }
-function* getBrandsData() {
-  try {
-    const response = yield call(getBrandsAkeneo);
-    yield put(getBrandSuccess(GET_BRANDs, response.data));
-  } catch (error) {
-    console.log("brand error");
-  }
-}
+// function* getBrandsData() {
+//   try {
+//     const response = yield call(getBrandsAkeneo);
+//     yield put(getBrandSuccess(GET_BRANDs, response.data));
+//   } catch (error) {
+//     console.log("brand error");
+//   }
+// }
 
-export function* watchGetProducts() {
-  yield takeEvery(GET_PRODUCTS, getProducts);
-}
+// export function* watchGetProducts() {
+//   yield takeEvery(GET_PRODUCTS, getProducts);
+// }
 export function* watchGetItem() {
   yield takeEvery(GET_SELECTED_ITEM, getItem);
 }
@@ -164,9 +164,9 @@ export function* watchGetTableColumns() {
 export function* watchUpdateTableColumns() {
   yield takeEvery(UPDATE_TABLE_COLUMNS, updateTableColumns);
 }
-export function* watchBGetBrands() {
-  yield takeEvery(GET_BRAND, getBrands);
-}
+// export function* watchBGetBrands() {
+//   yield takeEvery(GET_BRAND, getBrands);
+// }
 export function* watchAddBrand() {
   yield takeEvery(ADD_BRAND, addBrand);
 }
@@ -179,22 +179,22 @@ export function* watchAddVendor() {
 export function* watchUpdateProduct() {
   yield takeEvery(UPDATE_PRODUCT, updateProduct);
 }
-export function* watchGetBrandsData() {
-  yield takeEvery(GET_BRANDs, getBrandsData);
-}
+// export function* watchGetBrandsData() {
+//   yield takeEvery(GET_BRANDs, getBrandsData);
+// }
 function* ecommerceSaga() {
   yield all([
-    fork(watchGetProducts),
+    // fork(watchGetProducts),
     fork(watchGetItem),
     fork(watchAddProduct),
     fork(watchGetTableColumns),
     fork(watchUpdateTableColumns),
-    fork(watchBGetBrands),
+    // fork(watchBGetBrands),
     fork(watchAddBrand),
     fork(watchGetVendor),
     fork(watchAddVendor),
     fork(watchUpdateProduct),
-    fork(watchGetBrandsData),
+    // fork(watchGetBrandsData),
   ]);
 }
 

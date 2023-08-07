@@ -1,12 +1,13 @@
 import axios from "axios";
 import { baseUrl } from "../../../helpers/baseUrl";
 
-export const getBrandsData = async (brandId) => {
+export const getBrandsData = async (brandId, client_secret) => {
   try {
+
     const response = await axios.get(
-      `${baseUrl}/price/pricing_category/${brandId}`
+      `${baseUrl}/price/pricing_category/${brandId}/${client_secret}`
     );
-    console.log(response);
+
     return response;
   } catch (error) {
     return error.response;
@@ -42,10 +43,10 @@ export const updateCategory = async (body) => {
     return error.response;
   }
 };
-export const updateBrandsSetting = async (body, id) => {
+export const updateBrandsSetting = async (body, id, sourceId) => {
   try {
     const response = await axios.put(
-      `${baseUrl}/product/update_the_products_websiteId/${id}`,
+      `${baseUrl}/product/update_the_products_websiteId/${id}/${sourceId}`,
       body
     );
 

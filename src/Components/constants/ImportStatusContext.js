@@ -1,4 +1,6 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
+import { getIntegrationData } from "../../pages/Ecommerce/Integration/IntegerationService";
+import { toast } from "react-toastify";
 
 export const ImportStatusContext = createContext();
 
@@ -26,20 +28,25 @@ export const ImportStatusProvider = ({ children }) => {
     Price: true,
     Brand: true,
     Product_Type: false,
-    List_Price: false,
-    MAP_Price: false,
-    Net_Cost: false,
-    Pricing_Category: false,
+    List_Price: true,
+    MAP_Price: true,
+    Net_Cost: true,
+    Pricing_Category: true,
     Quarterly_Rebate: false,
     Annual_Rebate: false,
-    Shipping_Cost: false,
-    Shipping_Method: false,
+    Shipping_Cost: true,
+    Shipping_Method: true,
     Shipping_Depth: false,
     Shipping_Weight: false,
     Shipping_Width: false,
+    ProfitMargin: true,
   });
 
   const [pageSize, setPageSize] = useState(10);
+
+  const [integerationData, setIntegerationData] = useState();
+
+  const [selectedIntegeration, setSelectedIntegeration] = useState();
 
   const sharedState = {
     selectedBrand,
@@ -66,6 +73,10 @@ export const ImportStatusProvider = ({ children }) => {
     setCurrentPage,
     isViewOpen,
     setIsViewOpen,
+    selectedIntegeration,
+    setSelectedIntegeration,
+    integerationData,
+    setIntegerationData,
   };
 
   const updateImportStatus = (status) => {
@@ -74,7 +85,11 @@ export const ImportStatusProvider = ({ children }) => {
 
   return (
     <ImportStatusContext.Provider
-      value={{ importStatus, updateImportStatus, sharedState }}
+      value={{
+        importStatus,
+        updateImportStatus,
+        sharedState,
+      }}
     >
       {children}
     </ImportStatusContext.Provider>

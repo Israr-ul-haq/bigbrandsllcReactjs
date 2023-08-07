@@ -5,7 +5,7 @@ import { updateBrandsSetting } from "./BrandsService";
 import Select from "react-select";
 import { toast } from "react-toastify";
 
-function BrandsSetting({ id, PricingList }) {
+function BrandsSetting({ id, PricingList, selectedSource }) {
   const [data, setData] = useState();
   const [loader, setLoader] = useState(false);
   const [addedData, setAddedData] = useState([]);
@@ -18,6 +18,7 @@ function BrandsSetting({ id, PricingList }) {
       return {
         websiteId: i.value,
         name: i.label,
+        website: i.website,
       };
     });
 
@@ -25,7 +26,8 @@ function BrandsSetting({ id, PricingList }) {
       {
         competitionData: finalData,
       },
-      id
+      id,
+      selectedSource
     );
     if (response) {
       toast.success("data save successfully", {
@@ -62,6 +64,7 @@ function BrandsSetting({ id, PricingList }) {
       (item) => ({
         value: item.websiteId,
         label: item.name,
+        website: item.website,
       })
     );
     setAddedData(defaultSelectedOptions);
@@ -70,6 +73,7 @@ function BrandsSetting({ id, PricingList }) {
   const options = data?.map((item) => ({
     value: item.id,
     label: item.name,
+    website: item.website,
   }));
 
   const handleChange = (selectedOptions) => {

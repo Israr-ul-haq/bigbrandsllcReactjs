@@ -11,3 +11,14 @@ export const getIntegrationData = async () => {
     return error.response;
   }
 };
+export const updateStatus = async (body) => {
+  try {
+    const response = await axios.put(
+      `${baseUrl}/integration/update_integration_status`,
+      body
+    );
+    return response;
+  } catch (error) {
+    return error.response;
+  }
+};

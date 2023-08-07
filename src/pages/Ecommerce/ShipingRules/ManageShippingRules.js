@@ -86,7 +86,10 @@ function ManageShippingRules() {
     });
 
     if (InputData.weightTo && InputData.weightFrom) {
-      if (InputData.weightTo <= InputData.weightFrom) {
+      const weightTo = Number(InputData.weightTo);
+      const weightFrom = Number(InputData.weightFrom);
+
+      if (weightTo <= weightFrom) {
         errors.weightTo = "Weight-To must be greater than Weight-From";
       }
     }
